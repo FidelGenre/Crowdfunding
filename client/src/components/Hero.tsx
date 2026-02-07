@@ -36,7 +36,7 @@ export function Hero({ onEnter }: { onEnter: () => void }) {
           </button>
           
           <a 
-            href="https://github.com/TU_USUARIO/TU_REPOSITORIO" 
+            href="https://github.com/FidelGenre/Crowdfunding" 
             target="_blank" 
             rel="noopener noreferrer"
             className="px-8 py-4 rounded-full text-white font-bold border border-slate-700 hover:bg-slate-800/50 transition-all flex items-center justify-center gap-2"
