@@ -5,7 +5,8 @@ import { parseEther, formatEther } from 'viem';
 import { useRouter } from 'next/navigation';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 
-const CONTRACT_ADDRESS = "0x78B4997086d208aF3905D456D8364f373A04d27C";
+// --- CONTRACT CONFIGURATION ---
+const CONTRACT_ADDRESS = "0x5329104dd74467E0baA14D43D5799ea464db7cB3";
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const CONTRACT_ABI = [
@@ -35,7 +36,7 @@ const CONTRACT_ABI = [
 
 const CATEGORIES = ["Technology", "Art", "Cinema", "Games", "Social"];
 
-//TARJETA INTELIGENTE 
+// --- SMART CAMPAIGN CARD COMPONENT ---
 function CampaignCard({ campaign, index, now, address, filter }: any) {
     const [metadata, setMetadata] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -43,21 +44,24 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
     
     const { openConnectModal } = useConnectModal();
 
-    // Leemos donaciones
+    // Read specific user donation for this campaign from the blockchain
     const { data: myDonation, refetch: refetchDonation } = useReadContract({
         address: CONTRACT_ADDRESS, abi: CONTRACT_ABI, functionName: 'donations',
         args: [BigInt(index), address || ZERO_ADDRESS],
     });
 
+    // Contract write hooks
     const { writeContract, data: hash, isPending: isSignPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
+    // Refetch user donation data after a successful transaction
     useEffect(() => {
         if (isConfirmed) {
             refetchDonation();
         }
     }, [isConfirmed, refetchDonation]);
 
+    // Fetch IPFS metadata (images, title, desc) using the contentHash
     useEffect(() => {
         if (!campaign.contentHash) return;
         fetch(`https://gateway.pinata.cloud/ipfs/${campaign.contentHash}`)
@@ -66,8 +70,10 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
             .catch(err => { console.error(err); setLoading(false); });
     }, [campaign.contentHash]);
 
+    // Filter logic for categories
     if (metadata && filter !== 'All' && metadata.category !== filter) return null;
 
+    // Calculation of progress and status
     const collected = Number(formatEther(campaign.amountCollected));
     const goal = Number(formatEther(campaign.goal));
     const progress = Math.min((collected / goal) * 100, 100);
@@ -75,15 +81,16 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
     
     const isClosed = now > deadlineMs;
     const isOwner = address && campaign.owner.toLowerCase() === address.toLowerCase();
-
     const isProcessing = isSignPending || isConfirming;
 
+    // Countdown calculations
     const timeLeftMs = Math.max(0, deadlineMs - now);
     const daysLeft = Math.floor(timeLeftMs / (1000 * 60 * 60 * 24));
     const hoursLeft = Math.floor((timeLeftMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minsLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
     const secsLeft = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
 
+    // Interaction Handlers
     const handleInvest = () => {
         if (!address) {
             if (openConnectModal) openConnectModal();
@@ -112,6 +119,7 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
     return (
         <div className="bg-slate-900/40 backdrop-blur-sm border border-slate-800/50 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 transition-all duration-300 group flex flex-col animate-fade-in w-full h-full relative">
             
+            {/* Loading Overlay for Transactions */}
             {isProcessing && (
                 <div className="absolute inset-0 bg-slate-950/60 z-50 flex flex-col items-center justify-center backdrop-blur-[2px] animate-in fade-in rounded-[2rem]">
                     <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
@@ -119,6 +127,7 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
                 </div>
             )}
 
+            {/* Campaign Image and Status Tags */}
             <div className="h-44 bg-slate-950 relative overflow-hidden flex-shrink-0">
                 <img src={metadata?.image || ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute top-3 right-3 bg-slate-950/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold border border-slate-800 uppercase tracking-widest">{metadata?.category}</div>
@@ -127,12 +136,14 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
                 </div>
             </div>
 
+            {/* Campaign Details */}
             <div className="p-5 flex-1 flex flex-col gap-4">
                 <div>
                     <h4 className="text-xl font-bold leading-tight mb-1 text-white group-hover:text-indigo-400 transition-colors line-clamp-1">{metadata?.title}</h4>
                     <p className="text-slate-400 text-xs line-clamp-2 leading-relaxed h-8">{metadata?.description}</p>
                 </div>
 
+                {/* Progress Bar */}
                 <div className="mt-auto">
                     <div className="flex justify-between text-xs font-bold mb-1.5 text-slate-400 font-mono">
                         <span className="text-cyan-400">{collected} ETH</span>
@@ -143,6 +154,7 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
                     </div>
                 </div>
 
+                {/* Conditional Buttons based on User Status and Campaign State */}
                 <div className="pt-1">
                     {isOwner ? (
                          isClosed && collected >= goal ? (
@@ -188,12 +200,14 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
     );
 }
 
+// --- MAIN CROWDFUNDING DASHBOARD ---
 export function Crowdfunding() {
   const [mounted, setMounted] = useState(false);
   const { address } = useAccount(); 
   const router = useRouter();
   const [status, setStatus] = useState(''); 
   
+  // Form State
   const [form, setForm] = useState({ title: '', desc: '', category: 'Technology', goal: '' });
   const [duration, setDuration] = useState({ days: '', hours: '', minutes: '' });
 
@@ -201,12 +215,14 @@ export function Crowdfunding() {
   const [preview, setPreview] = useState(''); 
   const [categoryFilter, setCategoryFilter] = useState('All');
   
+  // Global timer for countdowns
   const [now, setNow] = useState(Date.now());
   useEffect(() => { 
       const i = setInterval(() => setNow(Date.now()), 1000); 
       return () => clearInterval(i); 
   }, []);
 
+  // Read all campaigns from the contract
   const { data: campaignsRaw, refetch } = useReadContract({
     address: CONTRACT_ADDRESS, abi: CONTRACT_ABI, functionName: 'getCampaigns', query: { refetchInterval: 2000 }
   });
@@ -219,6 +235,7 @@ export function Crowdfunding() {
     if (isSuccess) { setStatus(''); refetch(); resetDashboard(); }
   }, [isSuccess, refetch]);
 
+  // Reset UI after actions
   const resetDashboard = (e?: React.MouseEvent) => {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       setForm({ title: '', desc: '', category: 'Technology', goal: '' });
@@ -240,6 +257,7 @@ export function Crowdfunding() {
       setForm({...form, goal: newVal});
   }
 
+  // Handle Campaign Creation: Pinata IPFS -> Blockchain
   const handlePublish = async () => {
       if (!address) return alert("Please connect your wallet first to create a campaign.");
       if (!imageFile) return;
@@ -257,16 +275,19 @@ export function Crowdfunding() {
 
       setStatus('Uploading...');
       try {
+          // 1. Upload Image to Pinata
           const formData = new FormData();
           formData.append("file", imageFile);
           const resImg = await fetch("/api/pinata", { method: "POST", body: formData });
           const imgData = await resImg.json();
           const imageUrl = `https://gateway.pinata.cloud/ipfs/${imgData.IpfsHash}`;
 
+          // 2. Upload Metadata JSON to Pinata
           const metadata = { title: form.title, description: form.desc, image: imageUrl, category: form.category };
           const resMeta = await fetch("/api/pinata", { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(metadata) });
           const metaData = await resMeta.json();
 
+          // 3. Send Transaction to Blockchain
           writeContract({ 
             address: CONTRACT_ADDRESS, 
             abi: CONTRACT_ABI, 
@@ -283,14 +304,12 @@ export function Crowdfunding() {
   return (
     <div className="min-h-screen w-full bg-slate-950 text-white font-sans flex flex-col md:flex-row overflow-hidden">
       
-      {/* ---------------- BARRA LATERAL (ASIDE) ---------------- */}
+      {/* ---------------- SIDEBAR (CREATION FORM) ---------------- */}
       <aside className="w-full md:w-[550px] lg:w-[700px] bg-slate-950/80 border-b md:border-b-0 md:border-r border-slate-900 flex flex-col md:h-screen z-20 relative shadow-2xl flex-shrink-0">
-        <div className="p-6 pt-20 lg:p-4 space-y-6 md:overflow-y-auto h-full scrollbar-hide">
+        <div className="p-6 pt-20 md:pt-10 lg:p-5 space-y-1 md:overflow-y-auto h-full scrollbar-hide">
             
             <div className="flex flex-col gap-4 mb-4">
-                
                 <div className="w-full flex flex-col items-center text-center">
-                    
                     <div className="flex items-center justify-center gap-3 mb-2">
                         <button onClick={handleBack} className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-indigo-500 transition-all shadow-lg group">
                             <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
@@ -306,7 +325,7 @@ export function Crowdfunding() {
                         Decentralized Fund v1.0
                     </p>
 
-                    <a href="https://sepolia.etherscan.io/address/0x78B4997086d208aF3905D456D8364f373A04d27C#code" target="_blank" rel="noopener noreferrer"
+                    <a href={`https://sepolia.etherscan.io/address/${CONTRACT_ADDRESS}#code`} target="_blank" rel="noopener noreferrer"
                         className="flex w-fit items-center gap-2 bg-emerald-900/20 border border-emerald-500/20 rounded-lg px-3 py-2 hover:bg-emerald-900/40 hover:border-emerald-500/40 transition-all group cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.05)] hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] mt-3">
                         <div className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -317,6 +336,7 @@ export function Crowdfunding() {
                 </div>
             </div>
 
+            {/* Creation Card */}
             <div className={`bg-slate-900/50 p-8 rounded-[2.5rem] border relative overflow-hidden shadow-inner transition-colors ${!address ? 'border-indigo-500/50 bg-indigo-900/10' : 'border-slate-800'}`}>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10"></div>
                 
@@ -380,14 +400,14 @@ export function Crowdfunding() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-auto sm:h-52">
                         <div className="space-y-2 h-40 sm:h-full flex flex-col">
-                             <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-wider uppercase">Cover</label>
+                             <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-wider uppercase">Cover Image</label>
                              <div className="relative group flex-1 border-2 border-dashed border-slate-800 rounded-2xl flex flex-col items-center justify-center overflow-hidden hover:border-indigo-500 hover:bg-slate-900 transition-all cursor-pointer bg-slate-950/30">
                                 <input type="file" accept="image/*" onChange={(e) => { if(e.target.files?.[0]) { setImageFile(e.target.files[0]); setPreview(URL.createObjectURL(e.target.files[0])); } }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
                                 {preview ? <img src={preview} className="absolute inset-0 w-full h-full object-cover opacity-80" /> : <div className="text-center"><div className="text-3xl mb-2">📸</div><p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Upload</p></div>}
                              </div>
                         </div>
                         <div className="space-y-2 h-40 sm:h-full flex flex-col">
-                            <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-wider uppercase">Story</label>
+                            <label className="text-[10px] font-bold text-slate-500 ml-1 tracking-wider uppercase">Project Story</label>
                             <textarea className="w-full flex-1 bg-slate-950 border border-slate-800 p-4 rounded-2xl outline-none resize-none text-slate-300 text-sm transition-all leading-relaxed placeholder:text-slate-700" 
                                 placeholder="Describe project..." value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} />
                         </div>
@@ -410,7 +430,7 @@ export function Crowdfunding() {
         </div>
       </aside>
 
-      {/* ---------------- MAIN CONTENT ---------------- */}
+      {/* ---------------- MAIN CONTENT (EXPLORER) ---------------- */}
       <main className="flex-1 bg-slate-950 h-screen overflow-y-auto relative">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
             <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[600px] bg-purple-900/10 blur-[120px] rounded-full"></div>
@@ -426,6 +446,7 @@ export function Crowdfunding() {
                         <p className="text-slate-500 text-sm mt-1">Discover and fund the future.</p>
                     </div>
                     
+                    {/* Category Filter Pills */}
                     <div className="flex flex-wrap gap-2">
                         {filterList.map((cat) => (
                             <button key={cat} onClick={() => setCategoryFilter(cat)}
@@ -437,6 +458,7 @@ export function Crowdfunding() {
                 </div>
             </div>
 
+            {/* Campaign Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-8 justify-items-center xl:justify-items-stretch">
                 {list.map((c, i) => (
                     <div key={i} className="w-full max-w-[450px] xl:max-w-none h-full">
@@ -445,6 +467,7 @@ export function Crowdfunding() {
                 ))}
             </div>
 
+            {/* Empty State */}
             {list.length === 0 && (
                 <div className="h-96 flex flex-col items-center justify-center border-2 border-dashed border-slate-900 rounded-[3rem] text-slate-600">
                     <p className="text-lg font-medium">No campaigns found.</p>
@@ -453,6 +476,7 @@ export function Crowdfunding() {
         </div>
       </main>
 
+      {/* Floating Transaction Notification */}
       {hash && <div className="fixed bottom-6 right-6 bg-slate-900 border border-slate-800 text-white p-4 rounded-2xl shadow-2xl text-xs z-50 animate-bounce font-mono flex items-center gap-3"><span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> TX Sent: {hash.substring(0, 10)}...</div>}
     </div>
   );

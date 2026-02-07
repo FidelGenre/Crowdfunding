@@ -2,10 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- BASE STYLES --- */
 html,
 body {
   padding: 0;
   margin: 0;
+  /* Standard system font stack for maximum compatibility and performance */
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
@@ -19,28 +21,31 @@ a {
   box-sizing: border-box;
 }
 
-/* --- Select (Dropdown) Moderno --- */
+/* --- MODERN DROPDOWN (SELECT) --- */
 select option {
-  background-color: #020617; /* slate-950 */
-  color: #e2e8f0; /* slate-200 */
+  background-color: #020617; /* Matches Tailwind's slate-950 */
+  color: #e2e8f0;            /* Matches Tailwind's slate-200 */
   padding: 12px;
 }
 
-/* Ocultar flechas nativas feas para poner las nuestras */
+/* --- NUMERIC INPUTS RESET --- */
+/* Removes default browser spin buttons (arrows) to implement custom UI controls */
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0; 
 }
+
+/* Fix for Firefox numeric inputs */
 input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* --- Input Numérico Moderno --- */
+/* --- CUSTOM MODERN NUMERIC INPUT CLASS --- */
 input[type="number"].modern-number-input {
   appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: textfield; /* Para Firefox */
+  -moz-appearance: textfield; 
   
   background-color: #1a1b2e;
   color: #a0a0b0;
@@ -51,11 +56,12 @@ input[type="number"].modern-number-input {
   outline: none;
 }
 
+/* Interactive focus state */
 input[type="number"].modern-number-input:focus {
   border-color: #4c51bf;
 }
 
-/* Ocultar las flechas predeterminadas (spin buttons) en inputs numéricos */
+/* Redundant reset to ensure browser arrows are hidden across all instances */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;

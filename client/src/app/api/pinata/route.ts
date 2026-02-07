@@ -1,22 +1,33 @@
 import { NextResponse, NextRequest } from "next/server";
 
+/**
+ * Route Configuration
+ * We disable the default bodyParser to handle raw file uploads (multipart/form-data) 
+ * manually, which is more efficient for IPFS pinning.
+ */
 export const config = {
   api: {
-    bodyParser: false, // Importante para manejar archivos
+    bodyParser: false, 
   },
 };
 
+/**
+ * POST Handler
+ * Proxies requests to Pinata to avoid exposing the JWT on the client side.
+ * Handles both JSON (campaign metadata) and Multipart (campaign images).
+ */
 export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get("content-type") || "";
 
-    // Validar que la clave de Pinata exista
+    // Security Check: Verify that the Pinata JWT is configured in environment variables
     if (!process.env.PINATA_JWT) {
-        console.error("❌ Error: Falta PINATA_JWT en .env.local");
+        console.error("❌ Error: PINATA_JWT is missing in .env.local");
         return NextResponse.json({ error: "Server Config Error: Missing JWT" }, { status: 500 });
     }
 
-    // Si es JSON (Metadatos: Título, Descripción...)
+    // --- CASE 1: JSON METADATA ---
+    // Handles pinning campaign details (Title, Description, Category, Image URL)
     if (contentType.includes("application/json")) {
       const body = await request.json();
       const res = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
@@ -31,7 +42,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data);
     } 
     
-    // Si es Archivo (La Imagen - Multipart)
+    // --- CASE 2: MULTIPART FILE ---
+    // Handles pinning the actual image file to IPFS
     else if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {

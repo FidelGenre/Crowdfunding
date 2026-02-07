@@ -1,6 +1,11 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Tailwind CSS Configuration
+ * This file defines the theme, plugins, and custom animations used throughout the dApp.
+ */
 const config: Config = {
+  // Define the paths to all of your template files
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,27 +13,38 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      // --- COPIA DESDE AQUÍ ---
       
-      // 1. Definimos CÓMO se mueve (Keyframes)
+      // --- CUSTOM ANIMATION CONFIGURATION ---
+      
+      /**
+       * 1. Keyframes
+       * Defines the specific movements and opacity changes for CSS animations.
+       */
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
         fadeInUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' }, // Empieza invisible y 20px abajo
-          '100%': { opacity: '1', transform: 'translateY(0)' },   // Termina visible y en su lugar
+          // Starts invisible and 20px below its final position
+          '0%': { opacity: '0', transform: 'translateY(20px)' }, 
+          // Ends fully visible at its natural position
+          '100%': { opacity: '1', transform: 'translateY(0)' },   
         },
       },
       
-      // 2. Definimos CUÁNTO tarda (Animations)
+      /**
+       * 2. Animation Classes
+       * Combines keyframes with duration and easing to create reusable utility classes.
+       */
       animation: {
+        // Usage: className="animate-fade-in"
         'fade-in': 'fadeIn 0.5s ease-out forwards',
-        'fade-in-up': 'fadeInUp 0.8s ease-out forwards', // Tarda 0.8 segundos
+        // Usage: className="animate-fade-in-up"
+        'fade-in-up': 'fadeInUp 0.8s ease-out forwards', 
       },
 
-      // --- HASTA AQUÍ ---
+      // --- VISUAL DESIGN EXTENSIONS ---
       
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
@@ -39,4 +55,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;

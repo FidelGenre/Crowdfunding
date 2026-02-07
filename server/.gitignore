@@ -1,14 +1,42 @@
-# Compiler files
-cache/
+# --- DEPENDENCIES ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- NEXT.JS / FRONTEND ---
+.next/
 out/
-
-# Ignores development broadcast logs
-!/broadcast
-/broadcast/*/31337/
-/broadcast/**/dry-run/
-
-# Docs
-docs/
-
-# Dotenv file
+build/
+dist/
+# SECURITY: Never commit environment variables to GitHub
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- FOUNDRY / SMART CONTRACTS ---
+# Ignore Forge compiler output and cache
+out/
+cache/
+# SECURITY: Ignore transaction logs as they contain sensitive deployment data
+broadcast/
+# Ignore gas usage reports
+.gas-snapshot
+
+# --- SYSTEM / IDE ---
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- DEPLOYMENT & TOOLS ---
+.vercel
+.turbo

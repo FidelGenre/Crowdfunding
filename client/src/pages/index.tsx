@@ -5,42 +5,49 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Crowdfunding } from '../components/Crowdfunding'; 
 import { Hero } from '../components/Hero';
 
+/**
+ * HomeContent Component
+ * Manages the main logic for switching between the Hero (landing) 
+ * and the Crowdfunding (application) views using URL parameters.
+ */
 function HomeContent() {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  // Leemos el parámetro 'view' de la URL para persistencia
+  // Read the 'view' parameter from the URL for state persistence
   const view = searchParams?.get('view');
   const showApp = view === 'app';
 
+  // Ensure the component is mounted to prevent hydration errors
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Navegación suave hacia la App cambiando la URL
+  // Smooth navigation to the App by updating the URL
   const handleEnter = () => {
     router.push('/?view=app');
   };
 
-  // Volver al Hero limpiando la URL
+  // Return to the Hero section by clearing the URL parameters
   const handleBack = () => {
     router.push('/');
   };
 
+  // Prevent rendering until the client-side mounting is complete
   if (!mounted) return null;
 
   return (
     <main className="relative min-h-screen w-full bg-slate-950">
       
-      {/* Botón Wallet: Visible solo si el usuario decidió entrar a la App */}
+      {/* Wallet Button: Only visible if the user is inside the App view */}
       {showApp && (
         <div className="absolute top-6 right-6 z-50 animate-fade-in">
           <ConnectButton />
         </div>
       )}
 
-      {/* Lógica de renderizado basada en la URL */}
+      {/* Conditional rendering logic based on the URL 'view' param */}
       {!showApp ? (
         <Hero onEnter={handleEnter} />
       ) : (
@@ -52,6 +59,10 @@ function HomeContent() {
   );
 }
 
+/**
+ * Main Page Component
+ * Wrapped in Suspense to handle Next.js client-side search params correctly.
+ */
 export default function Home() {
   return (
     <Suspense fallback={
