@@ -155,7 +155,6 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
                                 </div>
                             )}
                             
-                            {/* 🚀 CORRECCIÓN: Eliminé "&& myDonation" para evitar que salga el "0" */}
                             {isClosed && collected < goal && address && Number(myDonation) > 0 && (
                                 <button disabled={isProcessing} onClick={handleRefund} 
                                     className="w-full text-[10px] font-bold text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 py-2.5 rounded-xl transition-colors uppercase tracking-widest animate-pulse disabled:opacity-50 disabled:animate-none disabled:cursor-wait flex justify-center items-center gap-2">
@@ -275,7 +274,6 @@ export function Crowdfunding() {
             
             <div className="flex flex-col gap-4 mb-4">
 
-                {/* 🚀 CORRECCIÓN: Botón Back integrado junto al título */}
                 <div className="w-full flex flex-col items-center text-center">
                     
                     <div className="flex items-center justify-center gap-3 mb-2">
@@ -409,7 +407,6 @@ export function Crowdfunding() {
                     <div>
                         <div className="flex items-center gap-4 flex-wrap">
                             <h3 className="text-3xl font-bold text-white tracking-tight">Explore Projects</h3>
-                            {/* ENLACE ELIMINADO DE AQUÍ (Ya está en la izquierda) */}
                         </div>
                         <p className="text-slate-500 text-sm mt-1">Discover and fund the future.</p>
                     </div>
