@@ -1,24 +1,21 @@
 // ⚠️ IMPORTANTE: PEGA AQUÍ LA NUEVA DIRECCIÓN DESPUÉS DEL DEPLOY
-export const CONTRACT_ADDRESS = "0x167be4137F6267f19aB865b32843385B70cf2D2e";
+export const CONTRACT_ADDRESS = "0x78B4997086d208aF3905D456D8364f373A04d27C";
 
 export const CONTRACT_ABI = [
   {
     "type": "function",
     "name": "createCampaign",
     "inputs": [
-      { "name": "_title", "type": "string" },
-      { "name": "_description", "type": "string" },
-      { "name": "_image", "type": "string" },
-      { "name": "_category", "type": "string" },
+      { "name": "_contentHash", "type": "string" }, 
       { "name": "_goal", "type": "uint256" },
-      { "name": "_durationInDays", "type": "uint256" }
+      { "name": "_duration", "type": "uint256" }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
   {
     "type": "function",
-    "name": "getAllCampaigns",
+    "name": "getCampaigns", 
     "inputs": [],
     "outputs": [
       {
@@ -26,14 +23,11 @@ export const CONTRACT_ABI = [
         "type": "tuple[]",
         "components": [
           { "name": "owner", "type": "address" },
-          { "name": "title", "type": "string" },
-          { "name": "description", "type": "string" },
-          { "name": "image", "type": "string" },
-          { "name": "category", "type": "string" },
           { "name": "goal", "type": "uint256" },
           { "name": "deadline", "type": "uint256" },
           { "name": "amountCollected", "type": "uint256" },
-          { "name": "claimed", "type": "bool" }
+          { "name": "claimed", "type": "bool" },
+          { "name": "contentHash", "type": "string" }
         ]
       }
     ],
@@ -59,5 +53,15 @@ export const CONTRACT_ABI = [
     "inputs": [{ "name": "_id", "type": "uint256" }],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "donations",
+    "inputs": [
+      { "name": "", "type": "uint256" },
+      { "name": "", "type": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view"
   }
 ] as const;

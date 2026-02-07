@@ -5,13 +5,28 @@ import { parseEther, formatEther } from 'viem';
 import { useRouter } from 'next/navigation';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 
-// ✅ DIRECCIÓN DEL CONTRATO EN SEPOLIA
-const CONTRACT_ADDRESS = "0x167be4137F6267f19aB865b32843385B70cf2D2e";
+const CONTRACT_ADDRESS = "0x78B4997086d208aF3905D456D8364f373A04d27C";
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const CONTRACT_ABI = [
   { "type": "function", "name": "createCampaign", "inputs": [{ "name": "_contentHash", "type": "string" }, { "name": "_goal", "type": "uint256" }, { "name": "_duration", "type": "uint256" }], "outputs": [], "stateMutability": "nonpayable" },
-  { "type": "function", "name": "getCampaigns", "inputs": [], "outputs": [{ "components": [{ "name": "owner", "type": "address" }, { "name": "contentHash", "type": "string" }, { "name": "goal", "type": "uint256" }, { "name": "deadline", "type": "uint256" }, { "name": "amountCollected", "type": "uint256" }, { "name": "claimed", "type": "bool" }], "type": "tuple[]" }], "stateMutability": "view" },
+  { 
+    "type": "function", 
+    "name": "getCampaigns", 
+    "inputs": [], 
+    "outputs": [{ 
+      "components": [
+        { "name": "owner", "type": "address" }, 
+        { "name": "goal", "type": "uint256" },      
+        { "name": "deadline", "type": "uint256" }, 
+        { "name": "amountCollected", "type": "uint256" }, 
+        { "name": "claimed", "type": "bool" },
+        { "name": "contentHash", "type": "string" } 
+      ], 
+      "type": "tuple[]" 
+    }], 
+    "stateMutability": "view" 
+  },
   { "type": "function", "name": "donateToCampaign", "inputs": [{ "name": "_id", "type": "uint256" }], "outputs": [], "stateMutability": "payable" },
   { "type": "function", "name": "withdrawFunds", "inputs": [{ "name": "_id", "type": "uint256" }], "outputs": [], "stateMutability": "nonpayable" },
   { "type": "function", "name": "claimRefund", "inputs": [{ "name": "_id", "type": "uint256" }], "outputs": [], "stateMutability": "nonpayable" },
@@ -20,7 +35,7 @@ const CONTRACT_ABI = [
 
 const CATEGORIES = ["Technology", "Art", "Cinema", "Games", "Social"];
 
-// --- TARJETA INTELIGENTE ---
+//TARJETA INTELIGENTE 
 function CampaignCard({ campaign, index, now, address, filter }: any) {
     const [metadata, setMetadata] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -270,10 +285,10 @@ export function Crowdfunding() {
       
       {/* ---------------- BARRA LATERAL (ASIDE) ---------------- */}
       <aside className="w-full md:w-[550px] lg:w-[700px] bg-slate-950/80 border-b md:border-b-0 md:border-r border-slate-900 flex flex-col md:h-screen z-20 relative shadow-2xl flex-shrink-0">
-        <div className="p-6 pt-20 md:pt-10 lg:p-5 space-y-1 md:overflow-y-auto h-full scrollbar-hide">
+        <div className="p-6 pt-20 lg:p-4 space-y-6 md:overflow-y-auto h-full scrollbar-hide">
             
             <div className="flex flex-col gap-4 mb-4">
-
+                
                 <div className="w-full flex flex-col items-center text-center">
                     
                     <div className="flex items-center justify-center gap-3 mb-2">
@@ -291,7 +306,7 @@ export function Crowdfunding() {
                         Decentralized Fund v1.0
                     </p>
 
-                    <a href="https://sepolia.etherscan.io/address/0x167be4137F6267f19aB865b32843385B70cf2D2e#code" target="_blank" rel="noopener noreferrer"
+                    <a href="https://sepolia.etherscan.io/address/0x78B4997086d208aF3905D456D8364f373A04d27C#code" target="_blank" rel="noopener noreferrer"
                         className="flex w-fit items-center gap-2 bg-emerald-900/20 border border-emerald-500/20 rounded-lg px-3 py-2 hover:bg-emerald-900/40 hover:border-emerald-500/40 transition-all group cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.05)] hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] mt-3">
                         <div className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
