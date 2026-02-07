@@ -45,12 +45,6 @@ function HomeContent() {
         <Hero onEnter={handleEnter} />
       ) : (
         <div className="animate-fade-in h-full w-full">
-           <button 
-             onClick={handleBack} 
-             className="fixed top-8 left-8 text-slate-500 hover:text-white text-[10px] font-bold uppercase tracking-[0.2em] z-50 transition-all bg-slate-900/50 px-4 py-2 rounded-full border border-slate-800 backdrop-blur-md"
-           >
-             ← Back to Home
-           </button>
            <Crowdfunding />
         </div>
       )}

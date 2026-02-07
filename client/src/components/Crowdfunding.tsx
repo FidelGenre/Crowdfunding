@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
 import { useRouter } from 'next/navigation';
-import { useConnectModal } from '@rainbow-me/rainbowkit'; // 🌈 Para abrir el modal automáticamente
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 // ✅ DIRECCIÓN DEL CONTRATO EN SEPOLIA
 const CONTRACT_ADDRESS = "0x167be4137F6267f19aB865b32843385B70cf2D2e";
@@ -20,7 +20,7 @@ const CONTRACT_ABI = [
 
 const CATEGORIES = ["Technology", "Art", "Cinema", "Games", "Social"];
 
-//TARJETA INTELIGENTE 
+// --- TARJETA INTELIGENTE ---
 function CampaignCard({ campaign, index, now, address, filter }: any) {
     const [metadata, setMetadata] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -28,19 +28,15 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
     
     const { openConnectModal } = useConnectModal();
 
-    // Leemos donaciones (usando ZERO_ADDRESS si no hay usuario conectado para evitar errores)
+    // Leemos donaciones
     const { data: myDonation, refetch: refetchDonation } = useReadContract({
         address: CONTRACT_ADDRESS, abi: CONTRACT_ABI, functionName: 'donations',
         args: [BigInt(index), address || ZERO_ADDRESS],
     });
 
-    // Capturamos el estado de la transacción para bloquar botones
     const { writeContract, data: hash, isPending: isSignPending } = useWriteContract();
-    
-    // Esperamos a que la blockchain confirme
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-    // Cuando se confirma, actualizamos el dato de donación automáticamente
     useEffect(() => {
         if (isConfirmed) {
             refetchDonation();
@@ -65,7 +61,6 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
     const isClosed = now > deadlineMs;
     const isOwner = address && campaign.owner.toLowerCase() === address.toLowerCase();
 
-    // Estados de carga combinados (Firmando en Wallet O Esperando confirmación)
     const isProcessing = isSignPending || isConfirming;
 
     const timeLeftMs = Math.max(0, deadlineMs - now);
@@ -141,7 +136,7 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
                              <button disabled={isProcessing} onClick={handleWithdraw} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl font-bold transition-all text-xs disabled:opacity-50 disabled:cursor-wait">
                                 {isProcessing ? 'Processing...' : '💰 Withdraw Funds'}
                              </button>
-                          ) : (
+                           ) : (
                             <div className={`w-full py-2.5 rounded-xl font-bold text-center border text-xs ${isClosed ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-slate-800/50 text-slate-400 border-slate-700/50'}`}>
                                 {isClosed ? "Goal Not Reached" : "Active Campaign (Owner)"}
                             </div>
@@ -155,12 +150,13 @@ function CampaignCard({ campaign, index, now, address, filter }: any) {
                                     
                                     <button disabled={isProcessing} onClick={handleInvest}
                                         className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-bold hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-50 disabled:cursor-wait text-xs py-2.5 shadow-lg shadow-cyan-500/20">
-                                        {isProcessing ? 'Investing...' : (address ? 'Invest' : 'Connect to Invest')}
+                                            {isProcessing ? 'Investing...' : (address ? 'Invest' : 'Connect to Invest')}
                                     </button>
                                 </div>
                             )}
                             
-                            {isClosed && collected < goal && address && myDonation && Number(myDonation) > 0 && (
+                            {/* 🚀 CORRECCIÓN: Eliminé "&& myDonation" para evitar que salga el "0" */}
+                            {isClosed && collected < goal && address && Number(myDonation) > 0 && (
                                 <button disabled={isProcessing} onClick={handleRefund} 
                                     className="w-full text-[10px] font-bold text-rose-400 border border-rose-500/30 hover:bg-rose-500/10 py-2.5 rounded-xl transition-colors uppercase tracking-widest animate-pulse disabled:opacity-50 disabled:animate-none disabled:cursor-wait flex justify-center items-center gap-2">
                                     {isProcessing ? 'Processing Refund...' : `Claim Refund (${formatEther(myDonation as bigint)} ETH)`}
@@ -273,21 +269,38 @@ export function Crowdfunding() {
   return (
     <div className="min-h-screen w-full bg-slate-950 text-white font-sans flex flex-col md:flex-row overflow-hidden">
       
-      <aside className="w-full md:w-[550px] lg:w-[650px] bg-slate-950/80 border-b md:border-b-0 md:border-r border-slate-900 flex flex-col md:h-screen z-20 relative shadow-2xl flex-shrink-0">
-        <div className="p-6 pt-10 md:pt-10 lg:p-10 space-y-6 md:overflow-y-auto h-full scrollbar-hide">
+      {/* ---------------- BARRA LATERAL (ASIDE) ---------------- */}
+      <aside className="w-full md:w-[550px] lg:w-[700px] bg-slate-950/80 border-b md:border-b-0 md:border-r border-slate-900 flex flex-col md:h-screen z-20 relative shadow-2xl flex-shrink-0">
+        <div className="p-6 pt-20 md:pt-10 lg:p-5 space-y-1 md:overflow-y-auto h-full scrollbar-hide">
             
             <div className="flex flex-col gap-4 mb-4">
-                <button onClick={handleBack} className="w-fit flex items-center gap-2 text-slate-500 hover:text-indigo-400 text-[10px] font-bold uppercase tracking-[0.2em] transition-all group">
-                    <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Home
-                </button>
 
-                <div onClick={resetDashboard} className="cursor-pointer text-center inline-block group select-none">
-                     <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-400 text-transparent bg-clip-text group-hover:opacity-80 transition-opacity">
-                        CryptoStarter 🚀
-                     </h1>
-                     <p className="text-slate-500 text-[10px] font-mono mt-1 uppercase tracking-widest">
+                {/* 🚀 CORRECCIÓN: Botón Back integrado junto al título */}
+                <div className="w-full flex flex-col items-center text-center">
+                    
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <button onClick={handleBack} className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-indigo-500 transition-all shadow-lg group">
+                            <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
+                        </button>
+                        <div onClick={resetDashboard} className="cursor-pointer group select-none">
+                            <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-400 text-transparent bg-clip-text group-hover:opacity-80 transition-opacity">
+                                Crowdfunding 🚀
+                            </h1>
+                        </div>
+                    </div>
+
+                    <p className="text-slate-500 text-[10px] font-mono mt-1 uppercase tracking-widest">
                         Decentralized Fund v1.0
-                     </p>
+                    </p>
+
+                    <a href="https://sepolia.etherscan.io/address/0x167be4137F6267f19aB865b32843385B70cf2D2e#code" target="_blank" rel="noopener noreferrer"
+                        className="flex w-fit items-center gap-2 bg-emerald-900/20 border border-emerald-500/20 rounded-lg px-3 py-2 hover:bg-emerald-900/40 hover:border-emerald-500/40 transition-all group cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.05)] hover:shadow-[0_0_20px_rgba(16,185,129,0.1)] mt-3">
+                        <div className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest group-hover:text-emerald-300 transition-colors">View on Etherscan</span>
+                    </a>
                 </div>
             </div>
 
@@ -384,6 +397,7 @@ export function Crowdfunding() {
         </div>
       </aside>
 
+      {/* ---------------- MAIN CONTENT ---------------- */}
       <main className="flex-1 bg-slate-950 h-screen overflow-y-auto relative">
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
             <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[600px] bg-purple-900/10 blur-[120px] rounded-full"></div>
@@ -395,14 +409,7 @@ export function Crowdfunding() {
                     <div>
                         <div className="flex items-center gap-4 flex-wrap">
                             <h3 className="text-3xl font-bold text-white tracking-tight">Explore Projects</h3>
-                            <a href="https://sepolia.etherscan.io/address/0x167be4137F6267f19aB865b32843385B70cf2D2e#code" target="_blank" rel="noopener noreferrer"
-                                className="flex items-center gap-2 bg-emerald-900/30 border border-emerald-500/30 rounded-lg px-4 py-2 hover:bg-emerald-900/50 hover:border-emerald-500/60 transition-all group cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                                <div className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                </div>
-                                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest group-hover:text-emerald-300 transition-colors">View on Etherscan</span>
-                            </a>
+                            {/* ENLACE ELIMINADO DE AQUÍ (Ya está en la izquierda) */}
                         </div>
                         <p className="text-slate-500 text-sm mt-1">Discover and fund the future.</p>
                     </div>
