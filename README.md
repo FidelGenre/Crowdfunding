@@ -2,9 +2,6 @@
 
 A decentralized Crowdfunding platform (dApp) built on the **Sepolia (Ethereum)** network. It allows users to create campaigns, donate ETH, and withdraw funds securely and transparently using smart contracts optimized for low gas consumption.
 
-![Preview](https://via.placeholder.com/800x400?text=App+Preview) 
-*(Note: Replace this link with a real screenshot of your application)*
-
 ## 🛠 Tech Stack
 
 * **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS.
